@@ -85,7 +85,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/jasonsoft/snowflake"
 )
@@ -111,7 +110,7 @@ func main() {
 	fmt.Printf("Base64 ID: %s\n", id.Base64())
 
 	// Print out the ID's timestamp
-	fmt.Printf("ID Time  : %d\n", id.Time())
+	fmt.Printf("ID Timestamp  : %d\n", id.Timestamp())
 
 	// Print out the ID's node number
 	fmt.Printf("ID Node  : %d\n", id.Node())
@@ -122,14 +121,12 @@ func main() {
 	// Generate and print, all in one.
 	fmt.Printf("ID       : %d\n", node.Generate().Int64())
 
-	//id = snowflake.ID(1046175565033246720)
-	ts := id.Time()
-	t := time.Unix(ts/1000, (ts%1000)*1000000)
-	t = t.UTC()
+	id = snowflake.ID(5821509406720)
+	t := id.Time()
 	fmt.Printf("time: %v\n", t)
 
 	ch := make(chan int64)
-	count := 100000
+	count := 10000
 	// 並發 count 個 goroutine 進行 snowflake ID 生成
 	for i := 0; i < count; i++ {
 		go func() {
@@ -155,7 +152,6 @@ func main() {
 	// 成功生成 snowflake ID
 	fmt.Println("All ", count, " snowflake ID generate successed!\n")
 }
-
 ```
 
 ### Performance

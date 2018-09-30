@@ -95,7 +95,7 @@ func NewNode(node int64) (*Node, error) {
 	stepMask = -1 ^ (-1 << StepBits)
 	timeShift = NodeBits + StepBits
 	nodeShift = StepBits
-	
+
 	if node < 0 || node > nodeMax {
 		return nil, errors.New("Node number must be between 0 and " + strconv.FormatInt(nodeMax, 10))
 	}
@@ -252,9 +252,16 @@ func (f ID) IntBytes() [8]byte {
 	return b
 }
 
-// Time returns an int64 unix timestamp of the snowflake ID time
-func (f ID) Time() int64 {
+// Timestamp returns an int64 unix timestamp of the snowflake ID time
+func (f ID) Timestamp() int64 {
 	return (int64(f) >> timeShift) + Epoch
+}
+
+// Timestamp returns an int64 unix timestamp of the snowflake ID time
+func (f ID) Time() time.Time {
+	ts := f.Timestamp()
+	t := time.Unix(ts/1000, (ts%1000)*1000000)
+	return t
 }
 
 // Node returns an int64 of the snowflake ID node number
