@@ -85,11 +85,14 @@ package main
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/bwmarrin/snowflake"
+	"github.com/jasonsoft/snowflake"
 )
 
 func main() {
+
+	snowflake.Epoch = 1538285895000
 
 	// Create a new Node with a Node number of 1
 	node, err := snowflake.NewNode(1)
@@ -116,9 +119,43 @@ func main() {
 	// Print out the ID's sequence number
 	fmt.Printf("ID Step  : %d\n", id.Step())
 
-  // Generate and print, all in one.
-  fmt.Printf("ID       : %d\n", node.Generate().Int64())
+	// Generate and print, all in one.
+	fmt.Printf("ID       : %d\n", node.Generate().Int64())
+
+	//id = snowflake.ID(1046175565033246720)
+	ts := id.Time()
+	t := time.Unix(ts/1000, (ts%1000)*1000000)
+	t = t.UTC()
+	fmt.Printf("time: %v\n", t)
+
+	ch := make(chan int64)
+	count := 100000
+	// 並發 count 個 goroutine 進行 snowflake ID 生成
+	for i := 0; i < count; i++ {
+		go func() {
+			id := node.Generate()
+			ch <- id.Int64()
+		}()
+	}
+
+	defer close(ch)
+
+	m := make(map[int64]int)
+	for i := 0; i < count; i++ {
+		id := <-ch
+		// 如果 map 中存在為 id 的 key, 說明生成的 snowflake ID 有重複
+		_, ok := m[id]
+		if ok {
+			fmt.Printf("ID is not unique!\n")
+			return
+		}
+		// 將 id 作為 key 存入 map
+		m[id] = i
+	}
+	// 成功生成 snowflake ID
+	fmt.Println("All ", count, " snowflake ID generate successed!\n")
 }
+
 ```
 
 ### Performance
